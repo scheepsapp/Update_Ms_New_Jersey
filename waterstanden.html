@@ -410,7 +410,13 @@ function loadShipHeight(shipHeightInputGlobal) {
         // DATA DEFINITIE - KRITISCHE HOGER WATER STANDEN (CM)
         // ====================================================================
         let waterstandDataDE = [
-       
+
+            { id: 'max', name: 'Maxau', level: 0, ref: 0.00, currentLevel: 0.00, listId: 'de', markeI_cm: 620, markeII_cm: 750 },
+            { id: 'spe', name: 'Speyer', level: 0, ref: 0.00, currentLevel: 0.00, listId: 'de', markeI_cm: 620, markeII_cm: 730 },
+            { id: 'man', name: 'Mannheim', level: 0, ref: 0.00, currentLevel: 0.00, listId: 'de', markeI_cm: 650, markeII_cm: 760 },
+            { id: 'wor', name: 'Worms', level: 0, ref: 0.00, currentLevel: 0.00, listId: 'de', markeI_cm: 440, markeII_cm: 640 },
+            { id: 'mai', name: 'Mainz', level: 0, ref: 0.00, currentLevel: 0.00, listId: 'de', markeI_cm: 475, markeII_cm: 630 },
+
             { id: 'kob', name: 'Koblenz', level: 0, ref: 0.00, currentLevel: 0.00, listId: 'de', markeI_cm: 460, markeII_cm: 640 },
             { id: 'bon', name: 'Bonn', level: 0, ref: 0.00, currentLevel: 0.00, listId: 'de', markeI_cm: 800000, markeII_cm: 9000000 },
             { id: 'kol', name: 'Koln', level: 0, ref: 0.00, currentLevel: 0.00, listId: 'de', markeI_cm: 620, markeII_cm: 830 },
@@ -422,6 +428,13 @@ function loadShipHeight(shipHeightInputGlobal) {
         ];
         
         let allBridgeDataDE = [
+            { id: 'germersheim', name: 'Germesheim', refDvh: 16.60, refWaterLevel: 0.00, locationId: 'max', listId: 'de' },
+            { id: 'Speyer', name: 'Speyer', refDvh: 16.40, refWaterLevel: 0.00, locationId: 'spe', listId: 'de' },
+            { id: 'Mainheim_2', name: 'Mainheim Necker', refDvh: 13.80 , refWaterLevel: 0.00, locationId: 'man', listId: 'de' },
+            { id: 'Mannheim', name: 'Mannheim', refDvh: 16.70, refWaterLevel: 0.00, locationId: 'man', listId: 'de' },
+            { id: 'worms', name: 'Worms', refDvh: 15.60, refWaterLevel: 0.00, locationId: 'wor', listId: 'de' },
+            { id: 'Mainz', name: 'Mainz', refDvh: 15.40, refWaterLevel: 0.00, locationId: 'mai', listId: 'de' },
+
            
             { id: 'koblenz_1', name: 'Koblenz', refDvh: 15.60, refWaterLevel: 0.00, locationId: 'kob', listId: 'de' },
             { id: 'weissenturm', name: 'Weissenturm', refDvh: 15.60, refWaterLevel: 0.00, locationId: 'kob', listId: 'de' },

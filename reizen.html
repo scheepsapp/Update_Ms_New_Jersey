@@ -46,7 +46,7 @@
                 <i class="fas fa-ship text-white text-xl"></i>
             </div>
             <div>
-                <h1 class="text-lg font-black uppercase tracking-tight text-white">MS New Mexico</h1>
+                <h1 class="text-lg font-black uppercase tracking-tight text-white">MS New Jersey</h1>
                 <span class="sync-badge" id="sync-text">Cloud Verbonden</span>
             </div>
         </div>
@@ -140,7 +140,7 @@
 
 <script>
 // --- CONFIGURATION ---
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXp5fRB9IRf_sbyWh8rQgksvpkHKKRhn4YjkuXleLgef7CzwQBkgdqH3yezHoQ0Pgs/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyRT8vC2SM6YsuS0dtbfvwT9Rbhg6L5eBdZl8dmnOD_HTVGnfzysIALVKPT8dT1iptN/exec';
 let actueleData = [];
 
 // --- 1. LOAD DATA ON START ---
@@ -385,7 +385,7 @@ function maakPDF() {
 doc.setFontSize(8);
 doc.setTextColor(255, 255, 255);
 // De verbeterde regel:
-doc.text(`Ms New Mexico - Wijgaart Shipping - ${new Date().toLocaleDateString('nl-NL')}`, 105, 294, { align: 'center' });
+doc.text(`Ms New Jersey - Wijgaart Shipping - ${new Date().toLocaleDateString('nl-NL')}`, 105, 294, { align: 'center' });
 
 
     // --- 4. DE TABEL ---
@@ -418,7 +418,7 @@ function formatteerDatum(datumStr) {
         }
     });
 
-    doc.save(`MS-New-Mexico-Reisverslag-${jaar}.pdf`);
+    doc.save(`MS-New-Jersey-Reisverslag-${jaar}.pdf`);
 }
 
 // Start de app
