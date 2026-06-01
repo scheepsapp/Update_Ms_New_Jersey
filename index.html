@@ -169,6 +169,11 @@
 }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--primary-blue); border-radius: 10px; }
+/* Extra stijlen voor de ELWIS tabel */
+        .elwis-sticky-col { position: sticky; left: 0; background: #071126; z-index: 10; border-right: 2px solid rgba(59, 130, 246, 0.4); width: 55px; min-width: 55px; }
+        .elwis-header-sticky { position: sticky; top: 0; background: #1e3a8a; z-index: 20; }
+        .elwis-corner { position: sticky; left: 0; top: 0; z-index: 30; background: #1b3891; border-right: 2px solid rgba(59, 130, 246, 0.4); }
+
 
 @keyframes pulse-red {
     0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
@@ -180,6 +185,16 @@
     color: #ef4444 !important;
     border-radius: 50%;
 }
+
+.right {
+    top: 20%;
+    right: 25px;
+    width: 420px;
+    overflow: hidden;
+    /* Zorg dat deze transition regel erbij staat voor het soepel breder worden: */
+    transition: width 0.4s ease-in-out, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
     </style>
 </head>
 <body>
@@ -293,7 +308,14 @@
 <p class="text-[0.55rem] text-blue-400 font-bold uppercase tracking-[2px] text-center mt-4 opacity-70 italic">Klik voor meer informatie</p>
     </aside>
 
-    <aside id="right-panel" class="side-panel right">
+   <aside id="right-panel" class="side-panel right flex flex-col">
+    
+    <div class="flex gap-2 mb-4 bg-white/5 p-1 rounded-xl border border-white/10 shrink-0">
+        <button id="btn-main-rws" onclick="switchMainTab('rws')" class="flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all">RWS Actueel</button>
+        <button id="btn-main-elwis" onclick="switchMainTab('elwis')" class="flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all">ELWIS Ruhrort</button>
+    </div>
+
+    <div id="rws-container" class="flex flex-col flex-1 relative">
         <div id="station-search-overlay">
             <div class="flex justify-between items-center mb-4">
                 <span class="text-[0.7rem] font-black text-blue-400 uppercase tracking-widest">Zoek Locatie</span>
@@ -305,7 +327,7 @@
 
         <h2 id="rws-title" class="text-[0.7rem] font-black tracking-[4px] text-blue-400 uppercase mb-4 text-center border-b border-blue-900/30 pb-2">Laden...</h2>
         
-        <div class="tab-container">
+        <div class="tab-container shrink-0">
             <button class="tab-btn active" id="tab-hoek" onclick="switchRWS('Hoek van Holland')">Hoek v. H</button>
             <button class="tab-btn" id="tab-dord" onclick="switchRWS('Dordrecht')">Dordrecht</button>
             <button class="tab-btn !flex-none px-4 bg-blue-600 text-white font-bold" onclick="toggleStationSearch()">+</button>
@@ -318,8 +340,41 @@
         <div class="web-mask">
             <iframe id="rws-frame" src="" style="top: -200px; left: -15%; width: 130%;"></iframe>
         </div>
-    </aside>
+    </div>
 
+<div id="elwis-container" class="hidden flex-col flex-1 relative">
+    
+    <div id="elwis-search-overlay" class="absolute inset-0 bg-[#071126]/95 backdrop-blur-md rounded-2xl p-4 z-50 hidden flex-col">
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-[0.7rem] font-black text-blue-400 uppercase tracking-widest">Wissel ELWIS Pegel</span>
+            <button onclick="toggleElwisSearch()" class="text-white bg-red-600/30 px-3 py-1 rounded-lg text-xs font-bold hover:bg-red-600/50 transition-all">SLUITEN</button>
+        </div>
+        <input type="text" id="elwis-filter" onkeyup="filterElwisStations()" placeholder="Typ pegel naam (bijv. Kaub)..." class="w-full bg-white/10 border border-white/20 rounded-xl p-3 mb-4 text-white outline-none focus:border-blue-500 font-bold">
+        <div id="elwis-station-list" class="flex-1 overflow-y-auto space-y-1 pr-2 custom-scrollbar text-[0.75rem]">
+            </div>
+    </div>
+
+    <h2 id="elwis-title" class="text-[0.7rem] font-black tracking-[4px] text-blue-400 uppercase mb-4 text-center border-b border-blue-900/30 pb-2">ELWIS Ruhrort Live</h2>
+    
+<div class="tab-container shrink-0">
+    <button class="tab-btn active" id="tab-elwis-kaub" onclick="switchELWIS('Kaub', this)">Kaub</button>
+    <button class="tab-btn" id="tab-elwis-koeln" onclick="switchELWIS('Köln', this)">Köln</button>
+    <button class="tab-btn" id="tab-elwis-koblenz" onclick="switchELWIS('Koblenz', this)">Koblenz</button>
+    <button class="tab-btn !flex-none px-4 bg-blue-600 text-white font-bold" onclick="toggleElwisSearch()">+</button>
+</div>
+    
+    <div class="web-mask bg-[#020617] overflow-x-auto overflow-y-auto custom-scrollbar flex flex-col relative" style="height: 457px; background: rgba(2, 6, 23, 0.8);">
+        <div id="elwis-loading" class="absolute inset-0 flex items-center justify-center text-blue-400 text-[0.7rem] font-black uppercase tracking-widest animate-pulse z-50">Gegevens ophalen...</div>
+        
+        <table id="elwis-table" class="w-full text-left text-[0.75rem] text-white hidden min-w-[680px] border-collapse select-none">
+            <thead></thead>
+            <tbody id="elwis-tbody" class="divide-y divide-white/5 font-semibold"></tbody>
+        </table>
+    </div>
+</div>
+
+    </aside>
+    
     <main class="flex flex-col items-center w-full px-4">
         <div class="search-box">
             <form action="https://www.google.com/search" method="get" target="_blank">
@@ -366,26 +421,19 @@
         <span>RWS</span>
     </a>
 
-    <a href="https://www.elwis.de/DE/dynamisch/Wasserstaende/Pegelliste:area:RHEINGEBIET" target="win_elwis" class="card">
-        <img src="pic/elwis_logo.png" style="height: 45px;">
-        <span>Elwis</span>
-    </a>
+  
 
     <a href="https://fleet.tresco.eu/map" target="win_wijgaart" class="card">
         <img src="pic/tresco.png" style="height: 40px;">
         <span>Wijgaart</span>
     </a>
 
-    <a href="http://192.168.8.1/" target="win_router" class="card">
-        <img src="pic/router.png" style="height: 50px;">
-        <span>Router</span>
-    </a>
 
 
 
-    <a href="https://vaarweginformatie.nl/frp/main/#/nts/map?limitationGroup=BLOCKED" target="win_stremming" class="card">
+    <a href="https://" target="win_stremming" class="card">
         <img src="pic/stremming.png" style="height: 45px;">
-        <span>Stremmingen</span>
+        <span>hochwasser</span>
     </a>
 
     <a href="https://trello.com/b/FRoIVDXN/new-jersey" target="win_trello" class="card">
@@ -742,7 +790,7 @@
 
   <script>
 // STEL JE HUIDIGE VERSIE HIER IN
-        const currentVersion = "1.0.6"; 
+        const currentVersion = "1.0.7"; 
 const githubUrl = "https://raw.githubusercontent.com/scheepsapp/Update_Ms_New_Jersey/refs/heads/main/index.html";
 
 async function checkForUpdates() {
@@ -896,7 +944,12 @@ const stations = [ { id: 1, name: "Hoek van Holland", url: "https://waterinfo.rw
         }, 1000); });
         refreshBtn.addEventListener('mouseup', () => { clearTimeout(pressTimer); refreshRWS(); });
 
-        window.onload = () => { switchRWS('Hoek van Holland'); updateClock(); setInterval(updateClock, 1000); };
+window.onload = () => {
+    switchRWS('Hoek van Holland');
+    updateClock();
+    setInterval(updateClock, 1000);
+    initStationSearch(); // of iets vergelijkbaars
+};
 
 
 function toggleSettingsMenu() {
@@ -990,6 +1043,262 @@ document.getElementById('helpdesk-form').addEventListener('submit', async functi
         btn.style.opacity = '1';
     }
 });
+let elwisLoaded = false;
+        
+ function switchMainTab(tab) {
+    const rwsCont = document.getElementById('rws-container');
+    const elwisCont = document.getElementById('elwis-container');
+    const btnRws = document.getElementById('btn-main-rws');
+    const btnElwis = document.getElementById('btn-main-elwis');
+    const rightPanel = document.getElementById('right-panel'); // Het paneel zelf selecteren
+
+    if (tab === 'rws') {
+        // 1. Maak het paneel weer de normale breedte
+        rightPanel.style.width = "420px";
+
+        // Toon RWS, verberg ELWIS
+        rwsCont.classList.remove('hidden'); 
+        rwsCont.classList.add('flex');
+        elwisCont.classList.add('hidden'); 
+        elwisCont.classList.remove('flex');
+        
+        // Herstel actieve styling RWS knop
+        btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
+        btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
+    } else {
+        // 2. Maak het paneel breder voor de ELWIS tabel (bijv. 750px of 800px)
+        rightPanel.style.width = "750px";
+
+        // Verberg RWS, toon ELWIS
+        rwsCont.classList.add('hidden'); 
+        rwsCont.classList.remove('flex');
+        elwisCont.classList.remove('hidden'); 
+        elwisCont.classList.add('flex');
+        
+        // Zet actieve styling op ELWIS knop
+        btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
+        btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
+        
+        // Laad de tabel live in als dat nog niet gebeurd is
+        if (!elwisLoaded) haalElwisDataOp();
+    }
+}
+// ==========================================
+// ELWIS MULTI-PEGEL INTEGRATIE MET ZOEKFUNCTIE
+// ==========================================
+
+// 1. Complete database van alle 18 Rijn-pegels met hun specifieke info en Google Script URL's
+// ⚠️ Vervang de test-links (Script ID 1 t/m 18) door jouw echte Google Script macro URL's!
+const elwisStations = [
+    { name: "MAXAU", info: "M_I=620 GlW=372", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_1/exec" },
+    { name: "SPEYER", info: "M_I=620 GlW=237", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_2/exec" },
+    { name: "MANNHEIM", info: "M_I=650 GlW=155", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_3/exec" },
+    { name: "WORMS", info: "M_I=440 GlW=68", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_4/exec" },
+    { name: "MAINZ", info: "M_I=475 GlW=171", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_5/exec" },
+    { name: "OESTRICH", info: "GlW=92", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_6/exec" },
+    { name: "BINGEN", info: "M_I=350 GlW=97", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_7/exec" },
+    { name: "KAUB", info: "M_I=460 GlW=77", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_8/exec" },
+    { name: "KOBLENZ", info: "M_I=470 GlW=77", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_9/exec" },
+    { name: "ANDERNACH", info: "M_I=550 GlW=91", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_10/exec" },
+    { name: "OBERWINTER", info: "M_I=490", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_11/exec" },
+    { name: "BONN", info: "GlW=142", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_12/exec" },
+    { name: "KÖLN", info: "M_I=620 GlW=139", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_13/exec" },
+    { name: "DÜSSELDORF", info: "M_I=710 GlW=91", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_14/exec" },
+    { name: "DUISBURG-RUHRORT", info: "M_I=930 GlW=227", url: "https://script.google.com/macros/s/AKfycbxsq6nefKob1YN15SujzFJgE3XKPP3OH_avUC0XzJHaalOs12PTdgVedCYfY1flY8-HEA/exec" },
+    { name: "WESEL", info: "M_I=870 GlW=174", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_16/exec" },
+    { name: "REES", info: "GlW=118", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_17/exec" },
+    { name: "EMMERICH", info: "GlW=118", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_18/exec" }
+];
+
+
+
+// 2. Schakelen tussen de hoofdtabs RWS en ELWIS (Met automatische paneel-breedte)
+function switchMainTab(tab) {
+    const rwsCont = document.getElementById('rws-container');
+    const elwisCont = document.getElementById('elwis-container');
+    const btnRws = document.getElementById('btn-main-rws');
+    const btnElwis = document.getElementById('btn-main-elwis');
+    const rightPanel = document.getElementById('right-panel');
+
+    if (tab === 'rws') {
+        rightPanel.style.width = "420px";
+        rwsCont.classList.remove('hidden'); rwsCont.classList.add('flex');
+        elwisCont.classList.add('hidden'); elwisCont.classList.remove('flex');
+        btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
+        btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
+    } else {
+        rightPanel.style.width = "750px";
+        rwsCont.classList.add('hidden'); rwsCont.classList.remove('flex');
+        elwisCont.classList.remove('hidden'); elwisCont.classList.add('flex');
+        btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
+        btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
+        
+        haalElwisDataOp();
+    }
+}
+
+// 3. Open of sluit de ELWIS zoeklijst overlay (Aangestuurd door de + knop)
+function toggleElwisSearch() {
+    const overlay = document.getElementById('elwis-search-overlay');
+    overlay.classList.toggle('hidden');
+    if (!overlay.classList.contains('hidden')) {
+        document.getElementById('elwis-filter').value = '';
+        initElwisStationSearch(); 
+        document.getElementById('elwis-filter').focus();
+    }
+}
+
+// 4. Bouw de 18 klikbare pegels op in de overlay met hun M_I en GlW info
+function initElwisStationSearch() {
+    const lijstDiv = document.getElementById('elwis-station-list');
+    lijstDiv.innerHTML = '';
+    
+    elwisStations.forEach(station => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-3 rounded-xl bg-white/5 hover:bg-blue-600/30 border border-white/5 hover:border-blue-500/50 flex justify-between items-center transition-all mb-1 uppercase font-bold tracking-wider";
+        btn.innerHTML = `
+            <span>${station.name}</span>
+            <span class="text-[0.6rem] text-slate-400 font-mono normal-case font-normal">(${station.info})</span>
+        `;
+        btn.onclick = () => {
+            switchELWIS(station.name);
+            toggleElwisSearch();
+        };
+        lijstDiv.appendChild(btn);
+    });
+}
+
+// 5. Live filteren van de 18 pegels tijdens het typen
+function filterElwisStations() {
+    const query = document.getElementById('elwis-filter').value.toUpperCase();
+    const knoppen = document.getElementById('elwis-station-list').getElementsByTagName('button');
+    
+    for (let i = 0; i < knoppen.length; i++) {
+        const txt = knoppen[i].textContent || knoppen[i].innerText;
+        knoppen[i].style.display = txt.toUpperCase().includes(query) ? "" : "none";
+    }
+}
+
+// 6. Wisselen van actieve ELWIS pegel
+// Onthoud welke pegel er actief is, standaard begint hij op Kaub
+var huidigeElwisPegel = "Kaub"; 
+
+// Onthoud welke pegel er actief is, standaard begint hij op Kaub
+var huidigeElwisPegel = "Kaub"; 
+
+function switchELWIS(pegelNaam) {
+    // Zorg ervoor dat de naam netjes met 1 hoofdletter geschreven is (bijv. "Kaub", "Köln")
+    huidigeElwisPegel = pegelNaam.charAt(0).toUpperCase() + pegelNaam.slice(1).toLowerCase();
+    
+    // Zorg dat de puntjes op de Ö bij Köln blijven staan als er op geklikt wordt
+    if (huidigeElwisPegel === "Koln" || huidigeElwisPegel === "Köln") {
+        huidigeElwisPegel = "Köln";
+    }
+
+    // 1. Titel boven de tabel aanpassen naar HOOFDLETTERS voor de uitstraling
+    document.getElementById('elwis-title').textContent = "ELWIS " + huidigeElwisPegel.toUpperCase() + " Live";
+    
+    // 2. Toon de lader en verberg de oude tabel
+    document.getElementById('elwis-loading').classList.remove('hidden');
+    document.getElementById('elwis-table').classList.add('hidden');
+    
+    // 3. Snelkeuze tabs blauw (active) maken of uitzetten op basis van je selectie
+    if (document.getElementById('tab-elwis-kaub')) {
+        document.getElementById('tab-elwis-kaub').classList.toggle('active', huidigeElwisPegel === 'Kaub');
+    }
+    if (document.getElementById('tab-elwis-koeln')) {
+        document.getElementById('tab-elwis-koeln').classList.toggle('active', huidigeElwisPegel === 'Köln');
+    }
+    if (document.getElementById('tab-elwis-koblenz')) {
+        document.getElementById('tab-elwis-koblenz').classList.toggle('active', huidigeElwisPegel === 'Koblenz');
+    }
+    
+    // 4. Roep direct de ophaal-functie aan om contact te maken met Google
+    haalElwisDataOp();
+}
+
+function haalElwisDataOp() {
+    // Verwijder het vorige script-element als dat er nog staat (voorkomt vastlopen van data)
+    var oudScript = document.getElementById('elwis-script-loader');
+    if (oudScript) { oudScript.remove(); }
+
+    // Jouw echte Google Script URL (Direct klaargezet voor gebruik!)
+    var scriptURL = "https://script.google.com/macros/s/AKfycbwMef342JSPL_dofw4e8vs8xErkn29ou7cSv2jKR_n8rbM4yDJhndD6pBGs0JQ0C_B9Dg/exec";
+    
+    // Plak de ?tab=Kaub (of ?tab=Köln, etc.) veilig achter de link
+    var volledigeURL = scriptURL + "?tab=" + encodeURIComponent(huidigeElwisPegel);
+
+    // Maak een nieuw script-element aan om de data via JSONP veilig binnen te halen
+    var nieuwScript = document.createElement('script');
+    nieuwScript.id = 'elwis-script-loader';
+    nieuwScript.src = volledigeURL;
+    
+    // Schiet het verzoek af naar Google Sheets
+    document.body.appendChild(nieuwScript);
+}
+
+// 8. Hulpfunctie om trends (+/-) en lege cellen mooi op te maken
+function formatteerStandDashboard(stand, trend) {
+    let s = stand ? stand.toString().trim() : "";
+    let t = trend ? trend.toString().trim() : "";
+    if (s === "" || s === "--") return "<span class='text-slate-500 font-normal'>--</span>";
+    let trendHtml = "";
+    if (t && t !== "--" && t !== "(--)") {
+        let kl = t.includes("-") ? "text-red-400" : (t.includes("+") ? "text-emerald-400" : "text-slate-400");
+        trendHtml = `<span class="${kl} ml-1 font-bold font-mono text-[0.65rem]">${t}</span>`;
+    }
+    return `<span class="font-bold text-white font-mono">${s}</span>${trendHtml}`;
+}
+
+// 9. De callback functie die de middelgrote, gelijk verdeelde tabel opbouwt
+function bouwElwisTabel(data) {
+    document.getElementById('elwis-loading').classList.add('hidden');
+    const tabel = document.getElementById('elwis-table');
+    tabel.classList.remove('hidden');
+
+    const thead = tabel.querySelector('thead');
+    thead.innerHTML = `
+        <tr class="text-[0.65rem] uppercase tracking-wider text-slate-300">
+            <th rowspan="2" class="p-1 border-b border-white/10 elwis-corner text-center">Uhr</th>
+            <th class="p-1 border-r border-white/10 border-b border-white/10 text-center elwis-header-sticky font-bold">${data.datums.gisteren || "Gist."}</th>
+            <th colspan="2" class="p-1 border-r border-white/10 border-b border-white/10 text-center elwis-header-sticky font-bold text-blue-400 bg-blue-950/20">Heute (${data.datums.vandaag || "Vand."})</th>
+            <th class="p-1 border-r border-white/10 border-b border-white/10 text-center elwis-header-sticky font-bold">${data.datums.morgen || "Morg."}</th>
+            <th colspan="2" class="p-1 border-r border-white/10 border-b border-white/10 text-center elwis-header-sticky font-bold text-amber-300 bg-amber-950/20">Overmorg.</th>
+            <th class="p-1 border-b border-white/10 text-center elwis-header-sticky font-bold">${data.datums.dagNaOvermorgen || "Dag +3"}</th>
+        </tr>
+        <tr class="bg-blue-900/40 text-[0.55rem] tracking-widest text-slate-400 font-black uppercase border-b border-white/10">
+            <th class="p-1 border-r border-white/10 text-center">Stand</th>
+            <th class="p-1 border-r border-white/10 text-center text-blue-300 bg-blue-950/20">Actueel</th>
+            <th class="p-1 border-r border-white/10 text-center text-blue-300 bg-blue-950/20">Verw.</th>
+            <th class="p-1 border-r border-white/10 text-center">Verw.</th>
+            <th class="p-1 border-r border-white/10 text-center text-amber-300 bg-amber-950/20">Voorsp.</th>
+            <th class="p-1 border-r border-white/10 text-center text-amber-400 bg-amber-950/20">Schat.</th>
+            <th class="p-1 text-center">Verw.</th>
+        </tr>
+    `;
+
+    const tbody = document.getElementById('elwis-tbody');
+    tbody.innerHTML = '';
+    
+data.rijen.forEach(rij => {
+        const tr = document.createElement("tr");
+        // text-[0.7rem] maakt de letters net iets groter en duidelijker
+        tr.className = "hover:bg-white/5 border-b border-white/5 transition-colors whitespace-nowrap text-[0.7rem]";
+        tr.innerHTML = `
+            <td class="p-2 elwis-sticky-col font-mono font-bold text-blue-300 text-center">${rij.tijd}</td>
+            <td class="p-2 border-r border-white/10 text-center">${formatteerStandDashboard(rij.gistStand, rij.gistTrend)}</td>
+            <td class="p-2 border-r border-white/10 text-center bg-blue-900/5">${formatteerStandDashboard(rij.vandStand, rij.vandTrend)}</td>
+            <td class="p-2 border-r border-white/10 text-center font-bold font-mono text-blue-200 bg-blue-900/5">${rij.vandVerwachting}</td>
+            <td class="p-2 border-r border-white/10 text-center font-bold font-mono text-slate-200">${rij.morgVerwachting}</td>
+            <td class="p-2 border-r border-white/10 text-center font-bold font-mono text-amber-300 bg-amber-900/5">${rij.overmorgVoorsp}</td>
+            <td class="p-2 border-r border-white/10 text-center font-medium font-mono italic text-slate-400 bg-amber-900/5">${rij.overmorgSchat}</td>
+            <td class="p-2 text-center font-bold font-mono text-slate-300">${rij.laatsteDag}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+            elwisLoaded = true;
+        }
     </script>
 </body>
 </html>
