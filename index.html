@@ -358,19 +358,20 @@
     
 <div class="tab-container shrink-0">
     <button class="tab-btn active" id="tab-elwis-kaub" onclick="switchELWIS('Kaub', this)">Kaub</button>
-    <button class="tab-btn" id="tab-elwis-koeln" onclick="switchELWIS('Köln', this)">Köln</button>
-    <button class="tab-btn" id="tab-elwis-koblenz" onclick="switchELWIS('Koblenz', this)">Koblenz</button>
+    <button class="tab-btn" id="tab-elwis-Oestrich" onclick="switchELWIS('Oestrich', this)">Oestrich</button>
+    <button class="tab-btn" id="tab-elwis-Maxau" onclick="switchELWIS('Maxau', this)">Maxau</button>
     <button class="tab-btn !flex-none px-4 bg-blue-600 text-white font-bold" onclick="toggleElwisSearch()">+</button>
 </div>
     
-    <div class="web-mask bg-[#020617] overflow-x-auto overflow-y-auto custom-scrollbar flex flex-col relative" style="height: 457px; background: rgba(2, 6, 23, 0.8);">
-        <div id="elwis-loading" class="absolute inset-0 flex items-center justify-center text-blue-400 text-[0.7rem] font-black uppercase tracking-widest animate-pulse z-50">Gegevens ophalen...</div>
-        
-        <table id="elwis-table" class="w-full text-left text-[0.75rem] text-white hidden min-w-[680px] border-collapse select-none">
-            <thead></thead>
-            <tbody id="elwis-tbody" class="divide-y divide-white/5 font-semibold"></tbody>
-        </table>
-    </div>
+<div class="web-mask bg-[#020617] overflow-x-auto overflow-y-auto custom-scrollbar flex flex-col relative" style="height: 457px; background: rgba(2, 6, 23, 0.8);">
+    <div id="elwis-loading" class="absolute inset-0 flex items-center justify-center text-blue-400 text-[0.7rem] font-black uppercase tracking-widest animate-pulse z-50">Gegevens ophalen...</div>
+    
+    <img id="elwis-maxau-img" class="w-full h-auto rounded-xl p-1 block" src="" alt="ELWIS Maxau Grafiek">
+
+    <table id="elwis-table" class="w-full text-left text-[0.75rem] text-white hidden min-w-[680px] border-collapse select-none">
+        <thead></thead>
+        <tbody id="elwis-tbody" class="divide-y divide-white/5 font-semibold"></tbody>
+    </table>
 </div>
 
     </aside>
@@ -787,7 +788,7 @@
 
   <script>
 // STEL JE HUIDIGE VERSIE HIER IN
-        const currentVersion = "1.0.8"; 
+        const currentVersion = "1.0.9"; 
 const githubUrl = "https://raw.githubusercontent.com/scheepsapp/Update_Ms_New_Jersey/refs/heads/main/index.html";
 
 async function checkForUpdates() {
@@ -1041,102 +1042,56 @@ document.getElementById('helpdesk-form').addEventListener('submit', async functi
     }
 });
 let elwisLoaded = false;
-        
- function switchMainTab(tab) {
-    const rwsCont = document.getElementById('rws-container');
-    const elwisCont = document.getElementById('elwis-container');
-    const btnRws = document.getElementById('btn-main-rws');
-    const btnElwis = document.getElementById('btn-main-elwis');
-    const rightPanel = document.getElementById('right-panel'); // Het paneel zelf selecteren
+var huidigeElwisPegel = "Kaub"; 
 
-    if (tab === 'rws') {
-        // 1. Maak het paneel weer de normale breedte
-        rightPanel.style.width = "420px";
 
-        // Toon RWS, verberg ELWIS
-        rwsCont.classList.remove('hidden'); 
-        rwsCont.classList.add('flex');
-        elwisCont.classList.add('hidden'); 
-        elwisCont.classList.remove('flex');
-        
-        // Herstel actieve styling RWS knop
-        btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
-        btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
-    } else {
-        // 2. Maak het paneel breder voor de ELWIS tabel (bijv. 750px of 800px)
-        rightPanel.style.width = "750px";
 
-        // Verberg RWS, toon ELWIS
-        rwsCont.classList.add('hidden'); 
-        rwsCont.classList.remove('flex');
-        elwisCont.classList.remove('hidden'); 
-        elwisCont.classList.add('flex');
-        
-        // Zet actieve styling op ELWIS knop
-        btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
-        btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
-        
-        // Laad de tabel live in als dat nog niet gebeurd is
-        if (!elwisLoaded) haalElwisDataOp();
-    }
-}
-// ==========================================
-// ELWIS MULTI-PEGEL INTEGRATIE MET ZOEKFUNCTIE
-// ==========================================
-
-// 1. Complete database van alle 18 Rijn-pegels met hun specifieke info en Google Script URL's
-// ⚠️ Vervang de test-links (Script ID 1 t/m 18) door jouw echte Google Script macro URL's!
 const elwisStations = [
-    { name: "MAXAU", info: "M_I=620 GlW=372", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_1/exec" },
-    { name: "SPEYER", info: "M_I=620 GlW=237", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_2/exec" },
-    { name: "MANNHEIM", info: "M_I=650 GlW=155", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_3/exec" },
-    { name: "WORMS", info: "M_I=440 GlW=68", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_4/exec" },
-    { name: "MAINZ", info: "M_I=475 GlW=171", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_5/exec" },
-    { name: "OESTRICH", info: "GlW=92", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_6/exec" },
-    { name: "BINGEN", info: "M_I=350 GlW=97", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_7/exec" },
-    { name: "KAUB", info: "M_I=460 GlW=77", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_8/exec" },
-    { name: "KOBLENZ", info: "M_I=470 GlW=77", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_9/exec" },
-    { name: "ANDERNACH", info: "M_I=550 GlW=91", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_10/exec" },
-    { name: "OBERWINTER", info: "M_I=490", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_11/exec" },
-    { name: "BONN", info: "GlW=142", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_12/exec" },
-    { name: "KÖLN", info: "M_I=620 GlW=139", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_13/exec" },
-    { name: "DÜSSELDORF", info: "M_I=710 GlW=91", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_14/exec" },
-    { name: "DUISBURG-RUHRORT", info: "M_I=930 GlW=227", url: "https://script.google.com/macros/s/AKfycbxsq6nefKob1YN15SujzFJgE3XKPP3OH_avUC0XzJHaalOs12PTdgVedCYfY1flY8-HEA/exec" },
-    { name: "WESEL", info: "M_I=870 GlW=174", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_16/exec" },
-    { name: "REES", info: "GlW=118", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_17/exec" },
-    { name: "EMMERICH", info: "GlW=118", url: "https://script.google.com/macros/s/HIER_JE_SCRIPT_ID_18/exec" }
+    { name: "Kaub", info: "" },
+    { name: "Oestrich", info: "" },
+    { name: "Maxau", info: "" },
+    { name: "Köln", info: "" },
+    { name: "Ruhrort", info: "" },
+    { name: "Düsseldorf", info: "" },
+    { name: "Emmerich", info: "" },
+    { name: "Mainz", info: "" },
+    { name: "Koblenz", info: "" },
+
+
 ];
 
-
-
-// 2. Schakelen tussen de hoofdtabs RWS en ELWIS (Met automatische paneel-breedte)
+// 2. Schakelen tussen de hoofdtabs RWS en ELWIS (Nu volledig waterdicht voor Maxau)
 function switchMainTab(tab) {
     const rwsCont = document.getElementById('rws-container');
     const elwisCont = document.getElementById('elwis-container');
     const btnRws = document.getElementById('btn-main-rws');
     const btnElwis = document.getElementById('btn-main-elwis');
-    const rightPanel = document.getElementById('right-panel');
 
     if (tab === 'rws') {
-        rightPanel.style.width = "420px";
-        rwsCont.classList.remove('hidden'); rwsCont.classList.add('flex');
-        elwisCont.classList.add('hidden'); elwisCont.classList.remove('flex');
-        btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
-        btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
-    } else {
-        rightPanel.style.width = "750px";
-        rwsCont.classList.add('hidden'); rwsCont.classList.remove('flex');
-        elwisCont.classList.remove('hidden'); elwisCont.classList.add('flex');
-        btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
-        btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
+        const rightPanel = document.getElementById('right-panel');
+        if (rightPanel) rightPanel.style.width = "420px";
         
-        haalElwisDataOp();
+        if (rwsCont) { rwsCont.classList.remove('hidden'); rwsCont.classList.add('flex'); }
+        if (elwisCont) { elwisCont.classList.add('hidden'); elwisCont.classList.remove('flex'); }
+        
+        if (btnRws) btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
+        if (btnElwis) btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
+    } else {
+        if (rwsCont) { rwsCont.classList.add('hidden'); rwsCont.classList.remove('flex'); }
+        if (elwisCont) { elwisCont.classList.remove('hidden'); elwisCont.classList.add('flex'); }
+        
+        if (btnElwis) btnElwis.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all";
+        if (btnRws) btnRws.className = "flex-1 py-2 text-[0.65rem] font-black uppercase rounded-lg text-slate-400 hover:text-white transition-all";
+        
+        // FIX: Activeer direct de actieve subtab, zodat Maxau of de tabel direct geladen wordt
+        switchELWIS(huidigeElwisPegel);
     }
 }
 
-// 3. Open of sluit de ELWIS zoeklijst overlay (Aangestuurd door de + knop)
+// 3. Open of sluit de ELWIS zoeklijst overlay
 function toggleElwisSearch() {
     const overlay = document.getElementById('elwis-search-overlay');
+    if (!overlay) return;
     overlay.classList.toggle('hidden');
     if (!overlay.classList.contains('hidden')) {
         document.getElementById('elwis-filter').value = '';
@@ -1145,9 +1100,10 @@ function toggleElwisSearch() {
     }
 }
 
-// 4. Bouw de 18 klikbare pegels op in de overlay met hun M_I en GlW info
+// 4. Bouw de klikbare pegels op in de overlay
 function initElwisStationSearch() {
     const lijstDiv = document.getElementById('elwis-station-list');
+    if (!lijstDiv) return;
     lijstDiv.innerHTML = '';
     
     elwisStations.forEach(station => {
@@ -1155,7 +1111,7 @@ function initElwisStationSearch() {
         btn.className = "w-full text-left p-3 rounded-xl bg-white/5 hover:bg-blue-600/30 border border-white/5 hover:border-blue-500/50 flex justify-between items-center transition-all mb-1 uppercase font-bold tracking-wider";
         btn.innerHTML = `
             <span>${station.name}</span>
-            <span class="text-[0.6rem] text-slate-400 font-mono normal-case font-normal">(${station.info})</span>
+            <span class="text-[0.6rem] text-slate-400 font-mono normal-case font-normal">${station.info}</span>
         `;
         btn.onclick = () => {
             switchELWIS(station.name);
@@ -1165,7 +1121,7 @@ function initElwisStationSearch() {
     });
 }
 
-// 5. Live filteren van de 18 pegels tijdens het typen
+// 5. Live filteren van de pegels tijdens het typen
 function filterElwisStations() {
     const query = document.getElementById('elwis-filter').value.toUpperCase();
     const knoppen = document.getElementById('elwis-station-list').getElementsByTagName('button');
@@ -1177,64 +1133,77 @@ function filterElwisStations() {
 }
 
 // 6. Wisselen van actieve ELWIS pegel
-// Onthoud welke pegel er actief is, standaard begint hij op Kaub
-var huidigeElwisPegel = "Kaub"; 
-
-// Onthoud welke pegel er actief is, standaard begint hij op Kaub
-var huidigeElwisPegel = "Kaub"; 
-
 function switchELWIS(pegelNaam) {
-    // Zorg ervoor dat de naam netjes met 1 hoofdletter geschreven is (bijv. "Kaub", "Köln")
     huidigeElwisPegel = pegelNaam.charAt(0).toUpperCase() + pegelNaam.slice(1).toLowerCase();
     
-    // Zorg dat de puntjes op de Ö bij Köln blijven staan als er op geklikt wordt
     if (huidigeElwisPegel === "Koln" || huidigeElwisPegel === "Köln") {
         huidigeElwisPegel = "Köln";
     }
 
-    // 1. Titel boven de tabel aanpassen naar HOOFDLETTERS voor de uitstraling
-    document.getElementById('elwis-title').textContent = "ELWIS " + huidigeElwisPegel.toUpperCase() + " Live";
-    
-    // 2. Toon de lader en verberg de oude tabel
-    document.getElementById('elwis-loading').classList.remove('hidden');
-    document.getElementById('elwis-table').classList.add('hidden');
-    
-    // 3. Snelkeuze tabs blauw (active) maken of uitzetten op basis van je selectie
-    if (document.getElementById('tab-elwis-kaub')) {
-        document.getElementById('tab-elwis-kaub').classList.toggle('active', huidigeElwisPegel === 'Kaub');
+    const elwisTabel = document.getElementById('elwis-table');
+    const elwisLader = document.getElementById('elwis-loading');
+    const maxauImg = document.getElementById('elwis-maxau-img');
+    const rightPanel = document.getElementById('right-panel');
+
+    const titleEl = document.getElementById('elwis-title');
+    if (titleEl) titleEl.textContent = "ELWIS " + huidigeElwisPegel.toUpperCase() + " Live";
+
+    // === SPECIFIEKE UITZONDERING VOOR MAXAU ===
+    if (huidigeElwisPegel === "Maxau") {
+        if (elwisLader) elwisLader.classList.add('hidden');
+        if (elwisTabel) elwisTabel.classList.add('hidden');
+        if (rightPanel) rightPanel.style.width = "700px";
+
+        if (maxauImg) {
+            maxauImg.classList.remove('hidden');
+            // Schone URL-opbouw voor weserv.nl met een unieke cachebuster &cb aan het eind
+            maxauImg.src = "https://images.weserv.nl/?url=https://www.hvz.baden-wuerttemberg.de/gifs/09016-2001.GIF&cb=" + Date.now();
+        }
+
+        stijlActieveElwisTab();
+        return;
     }
-    if (document.getElementById('tab-elwis-koeln')) {
-        document.getElementById('tab-elwis-koeln').classList.toggle('active', huidigeElwisPegel === 'Köln');
-    }
-    if (document.getElementById('tab-elwis-koblenz')) {
-        document.getElementById('tab-elwis-koblenz').classList.toggle('active', huidigeElwisPegel === 'Koblenz');
-    }
+    // === EINDE UITZONDERING MAXAU ===
+
+    if (maxauImg) maxauImg.classList.add('hidden');  
+    if (rightPanel) rightPanel.style.width = "750px"; 
     
-    // 4. Roep direct de ophaal-functie aan om contact te maken met Google
+    if (elwisLader) elwisLader.classList.remove('hidden');
+    if (elwisTabel) elwisTabel.classList.add('hidden');
+    
+    stijlActieveElwisTab();
     haalElwisDataOp();
 }
 
+// 7. Tab-knoppen de actieve 'blauwe' kleur geven
+function stijlActieveElwisTab() {
+    if (document.getElementById('tab-elwis-kaub')) {
+        document.getElementById('tab-elwis-kaub').classList.toggle('active', huidigeElwisPegel === 'Kaub');
+    }
+    if (document.getElementById('tab-elwis-Oestrich')) {
+        document.getElementById('tab-elwis-Oestrich').classList.toggle('active', huidigeElwisPegel === 'Oestrich');
+    }
+    if (document.getElementById('tab-elwis-Maxau')) {
+        document.getElementById('tab-elwis-Maxau').classList.toggle('active', huidigeElwisPegel === 'Maxau');
+    }
+}
+
+// 8. Haal tabeldata op via Google Script JSONP
 function haalElwisDataOp() {
-    // Verwijder het vorige script-element als dat er nog staat (voorkomt vastlopen van data)
     var oudScript = document.getElementById('elwis-script-loader');
     if (oudScript) { oudScript.remove(); }
 
-    // Jouw echte Google Script URL (Direct klaargezet voor gebruik!)
     var scriptURL = "https://script.google.com/macros/s/AKfycbwMef342JSPL_dofw4e8vs8xErkn29ou7cSv2jKR_n8rbM4yDJhndD6pBGs0JQ0C_B9Dg/exec";
-    
-    // Plak de ?tab=Kaub (of ?tab=Köln, etc.) veilig achter de link
     var volledigeURL = scriptURL + "?tab=" + encodeURIComponent(huidigeElwisPegel);
 
-    // Maak een nieuw script-element aan om de data via JSONP veilig binnen te halen
     var nieuwScript = document.createElement('script');
     nieuwScript.id = 'elwis-script-loader';
     nieuwScript.src = volledigeURL;
     
-    // Schiet het verzoek af naar Google Sheets
     document.body.appendChild(nieuwScript);
 }
 
-// 8. Hulpfunctie om trends (+/-) en lege cellen mooi op te maken
+// 9. Hulpfunctie voor styling tabel-trends
 function formatteerStandDashboard(stand, trend) {
     let s = stand ? stand.toString().trim() : "";
     let t = trend ? trend.toString().trim() : "";
