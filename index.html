@@ -357,9 +357,9 @@
     <h2 id="elwis-title" class="text-[0.7rem] font-black tracking-[4px] text-blue-400 uppercase mb-4 text-center border-b border-blue-900/30 pb-2">ELWIS Ruhrort Live</h2>
     
 <div class="tab-container shrink-0">
-    <button class="tab-btn active" id="tab-elwis-kaub" onclick="switchELWIS('Kaub', this)">Kaub</button>
-    <button class="tab-btn" id="tab-elwis-Oestrich" onclick="switchELWIS('Oestrich', this)">Oestrich</button>
     <button class="tab-btn" id="tab-elwis-Maxau" onclick="switchELWIS('Maxau', this)">Maxau</button>
+    <button class="tab-btn" id="tab-elwis-Oestrich" onclick="switchELWIS('Oestrich', this)">Oestrich</button>
+    <button class="tab-btn active" id="tab-elwis-kaub" onclick="switchELWIS('Kaub', this)">Kaub</button>
     <button class="tab-btn !flex-none px-4 bg-blue-600 text-white font-bold" onclick="toggleElwisSearch()">+</button>
 </div>
     
@@ -788,7 +788,7 @@
 
   <script>
 // STEL JE HUIDIGE VERSIE HIER IN
-        const currentVersion = "1.0.9"; 
+        const currentVersion = "1.1.0"; 
 const githubUrl = "https://raw.githubusercontent.com/scheepsapp/Update_Ms_New_Jersey/refs/heads/main/index.html";
 
 async function checkForUpdates() {
@@ -1047,15 +1047,16 @@ var huidigeElwisPegel = "Kaub";
 
 
 const elwisStations = [
-    { name: "Kaub", info: "" },
+    { name: "Maxau", info: "" },  
     { name: "Oestrich", info: "" },
-    { name: "Maxau", info: "" },
-    { name: "Köln", info: "" },
-    { name: "Ruhrort", info: "" },
-    { name: "Düsseldorf", info: "" },
-    { name: "Emmerich", info: "" },
-    { name: "Mainz", info: "" },
+    { name: "Kaub", info: "" },
     { name: "Koblenz", info: "" },
+    { name: "Köln", info: "" },
+    { name: "Düsseldorf", info: "" },
+    { name: "Ruhrort", info: "" },
+    { name: "Emmerich", info: "" },
+  
+    
 
 
 ];
