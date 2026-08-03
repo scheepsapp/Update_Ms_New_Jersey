@@ -13,11 +13,16 @@ if %errorLevel% neq 0 (
     exit /b
 )
 
-:: 2. Map instellen
+:: 2. Map instellen en controleren of deze bestaat
 set appDir=C:\Program Files (x86)\MS New Jersey
 set baseUrl=https://raw.githubusercontent.com/scheepsapp/Update_Ms_New_Jersey/refs/heads/main/
 
-:: 3. Elk bestand handmatig (geen ingewikkelde codes)
+if not exist "%appDir%" (
+    echo [INFO] Doelmap bestaat niet. Bezig met aanmaken...
+    mkdir "%appDir%"
+)
+
+:: 3. Elk bestand handmatig bijwerken
 
 echo Bezig met reizen.html...
 powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%baseUrl%/reizen.html' -OutFile '%TEMP%\reizen.html'"
@@ -43,6 +48,11 @@ if exist "%appDir%\waterstanden.html" attrib -h -s -r "%appDir%\waterstanden.htm
 move /y "%TEMP%\waterstanden.html" "%appDir%\waterstanden.html" >nul
 attrib +h +s +r "%appDir%\waterstanden.html"
 
+echo Bezig met hafenmeester_mannheim.html...
+powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%baseUrl%/hafenmeester_mannheim.html' -OutFile '%TEMP%\hafenmeester_mannheim.html'"
+if exist "%appDir%\hafenmeester_mannheim.html" attrib -h -s -r "%appDir%\hafenmeester_mannheim.html"
+move /y "%TEMP%\hafenmeester_mannheim.html" "%appDir%\hafenmeester_mannheim.html" >nul
+attrib +h +s +r "%appDir%\hafenmeester_mannheim.html"
 
 echo.
 echo ============================================
